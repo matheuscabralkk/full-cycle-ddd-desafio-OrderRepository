@@ -47,12 +47,14 @@ describe("Order repository test", () => {
     const product = new Product("123", "Product 1", 10);
     await productRepository.create(product);
 
+    const orderItemQuantity = 2;
     const ordemItem = new OrderItem(
       "1",
       product.name,
       product.price,
+      product.price * orderItemQuantity,
       product.id,
-      2
+        orderItemQuantity
     );
 
     const order = new Order("123", "123", [ordemItem]);
@@ -74,6 +76,7 @@ describe("Order repository test", () => {
           id: ordemItem.id,
           name: ordemItem.name,
           price: ordemItem.price,
+          totalPrice: ordemItem.totalPrice,
           quantity: ordemItem.quantity,
           order_id: "123",
           product_id: "123",
@@ -92,12 +95,14 @@ describe("Order repository test", () => {
     const productRepository = new ProductRepository();
     await productRepository.create(product);
 
+    const orderItemQuantity = 2;
     const ordemItem = new OrderItem(
         "1",
         product.name,
         product.price,
+        product.price * orderItemQuantity,
         product.id,
-        2
+        orderItemQuantity
     );
 
     const order = new Order("123", "123", [ordemItem]);
@@ -119,6 +124,7 @@ describe("Order repository test", () => {
           id: ordemItem.id,
           name: ordemItem.name,
           price: ordemItem.price,
+          totalPrice: ordemItem.totalPrice,
           quantity: ordemItem.quantity,
           order_id: "123",
           product_id: "123",
@@ -136,12 +142,14 @@ describe("Order repository test", () => {
     const product2 = new Product("321", "Product 2", 50);
     await productRepository.create(product2);
 
+    const orderItem2Quantity = 3;
     const ordemItem2 = new OrderItem(
         "2",
         product2.name,
         product2.price,
+        product2.price * orderItem2Quantity,
         product2.id,
-        3
+        orderItem2Quantity
     );
     order.changeItems([ordemItem2]);
 
@@ -166,6 +174,7 @@ describe("Order repository test", () => {
           id: ordemItem2.id,
           name: ordemItem2.name,
           price: ordemItem2.price,
+          totalPrice: ordemItem2.totalPrice,
           quantity: ordemItem2.quantity,
           order_id: "123",
           product_id: product2.id,
@@ -185,15 +194,17 @@ describe("Order repository test", () => {
     const productRepository = new ProductRepository();
     await productRepository.create(product);
 
+    const orderItemQuantity = 2;
     const ordemItem = new OrderItem(
         "1",
         product.name,
         product.price,
+        product.price * orderItemQuantity,
         product.id,
-        2
+        orderItemQuantity
     );
 
-    const order = new Order("123", "123", [ordemItem]);
+    const order = new Order("13123123", "123", [ordemItem]);
 
     const orderRepository = new OrderRepository();
     await orderRepository.create(order);
@@ -203,22 +214,25 @@ describe("Order repository test", () => {
       include: ["items"],
     });
 
+    const foundOrder = await orderRepository.find("13123123");
+
     expect(orderModel.toJSON()).toStrictEqual({
-      id: order.id,
-      customer_id: order.customerId,
-      total: order.total(),
+      id: foundOrder.id,
+      customer_id: foundOrder.customerId,
+      total: foundOrder.total(),
       items: [
         {
-          id: ordemItem.id,
-          name: ordemItem.name,
-          price: ordemItem.price,
-          quantity: ordemItem.quantity,
-          order_id: order.id,
-          product_id: ordemItem.productId,
+          id: foundOrder.items[0].id,
+          name: foundOrder.items[0].name,
+          price: foundOrder.items[0].price,
+          totalPrice: foundOrder.items[0].totalPrice,
+          quantity: foundOrder.items[0].quantity,
+          order_id: foundOrder.id,
+          product_id: foundOrder.items[0].productId,
         },
       ],
     });
-  });
+  }, 6000000);
 
   it("should find all orders", async () => {
     const customer = new Customer("123", "Customer 1");
@@ -231,26 +245,34 @@ describe("Order repository test", () => {
     const productRepository = new ProductRepository();
     await productRepository.create(product);
 
+    const ordemItem1Quantity = 2;
     const ordemItem1 = new OrderItem(
         "1",
         product.name,
         product.price,
+        product.price * ordemItem1Quantity,
         product.id,
-        2
+        ordemItem1Quantity
     );
+
+    const ordemItem2Quantity = 2
     const ordemItem2 = new OrderItem(
         "2",
         product.name,
         product.price,
+        product.price * ordemItem2Quantity,
         product.id,
-        2
+        ordemItem2Quantity
     );
+
+    const ordemItem3Quantity = 2
     const ordemItem3 = new OrderItem(
         "3",
         product.name,
         product.price,
+        product.price * ordemItem3Quantity,
         product.id,
-        2
+        ordemItem3Quantity
     );
 
     const order1 = new Order("1", "123", [ordemItem1]);
@@ -266,53 +288,59 @@ describe("Order repository test", () => {
       include: ["items"],
     });
 
+    const foundOrder1 = await orderRepository.find(ordemItem1.id);
     const orderModel1 = ordersModel[0];
     expect(orderModel1.toJSON()).toStrictEqual({
-      id: order1.id,
-      customer_id: order1.customerId,
-      total: order1.total(),
+      id: foundOrder1.id,
+      customer_id: foundOrder1.customerId,
+      total: foundOrder1.total(),
       items: [
         {
-          id: ordemItem1.id,
-          name: ordemItem1.name,
-          price: ordemItem1.price,
-          quantity: ordemItem1.quantity,
-          order_id: order1.id,
-          product_id: ordemItem1.productId,
+          id: foundOrder1.items[0].id,
+          name: foundOrder1.items[0].name,
+          price: foundOrder1.items[0].price,
+          totalPrice: foundOrder1.items[0].totalPrice,
+          quantity: foundOrder1.items[0].quantity,
+          order_id: foundOrder1.id,
+          product_id: foundOrder1.items[0].productId,
         },
       ],
     });
 
+    const foundOrder2 = await orderRepository.find(ordemItem2.id);
     const orderModel2 = ordersModel[1];
     expect(orderModel2.toJSON()).toStrictEqual({
-      id: order2.id,
-      customer_id: order2.customerId,
-      total: order2.total(),
+      id: foundOrder2.id,
+      customer_id: foundOrder2.customerId,
+      total: foundOrder2.total(),
       items: [
         {
-          id: ordemItem2.id,
-          name: ordemItem2.name,
-          price: ordemItem2.price,
-          quantity: ordemItem2.quantity,
-          order_id: order2.id,
-          product_id: ordemItem2.productId,
+          id: foundOrder2.items[0].id,
+          name: foundOrder2.items[0].name,
+          price: foundOrder2.items[0].price,
+          totalPrice: foundOrder2.items[0].totalPrice,
+          quantity: foundOrder2.items[0].quantity,
+          order_id: foundOrder2.id,
+          product_id: foundOrder2.items[0].productId,
         },
       ],
     });
 
+    const foundOrder3 = await orderRepository.find(ordemItem3.id);
     const orderModel3 = ordersModel[2];
     expect(orderModel3.toJSON()).toStrictEqual({
-      id: order3.id,
-      customer_id: order3.customerId,
-      total: order3.total(),
+      id: foundOrder3.id,
+      customer_id: foundOrder3.customerId,
+      total: foundOrder3.total(),
       items: [
         {
-          id: ordemItem3.id,
-          name: ordemItem3.name,
-          price: ordemItem3.price,
-          quantity: ordemItem3.quantity,
-          order_id: order3.id,
-          product_id: ordemItem3.productId,
+          id: foundOrder3.items[0].id,
+          name: foundOrder3.items[0].name,
+          price: foundOrder3.items[0].price,
+          totalPrice: foundOrder3.items[0].totalPrice,
+          quantity: foundOrder3.items[0].quantity,
+          order_id: foundOrder3.id,
+          product_id: foundOrder3.items[0].productId,
         },
       ],
     });
